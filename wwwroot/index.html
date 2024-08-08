@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="https://cdn.autodesk.io/favicon.ico">
+    <link rel="stylesheet" href="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/style.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/inspire-tree-dom@4.0.6/dist/inspire-tree-light.min.css">
+    <link rel="stylesheet" href="/main.css">
+
+    <title>Autodesk Platform Services: Hubs Browser</title>
+</head>
+
+<body>
+    
+    <div id="header">
+        <img class="logo" src="https://cdn.autodesk.io/logo/black/stacked.png" alt="Autodesk Platform Services">
+        <span class="title">Hubs Browser</span>
+        <button id="login" style="visibility: hidden;">Login</button>
+    </div>
+    <div id="sidebar">
+        <div id="tree"></div>
+    </div>
+    <div id="preview"></div>
+    
+    <script src="https://developer.api.autodesk.com/modelderivative/v2/viewers/7.*/viewer3D.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+    <script src="https://unpkg.com/inspire-tree@4.3.1/dist/inspire-tree.js"></script>
+    <script src="https://unpkg.com/inspire-tree-dom@4.0.6/dist/inspire-tree-dom.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.1/moment.min.js"></script>
+    <script src="/acc-pushpin.js"></script>
+
+    <script src="/MyExtension.js"></script>
+
+    <script src="/main.js" type="module"></script>
+
+    <label hidden="hidden" id="labelProjectId"></label>
+    <label hidden="hidden" id="labelitemUrn"></label>
+    <label hidden="hidden" id="labelVersionId"></label>
+
+    <div id='dialogPushpinData'> 
+        <h3>Please input title and subtype</h3>
+        <label for="title">Title:</label>
+        <input type="text" id="issue_title" name="issue_title" style="font-size:large;"><br><br>
+        <label for="title">Issue Sub Type:</label>
+        <ul id="issue_subtypes" style="height:100px; overflow: auto;"> 
+                
+        </ul>
+        <button id="d_cancel">Cancel</button> 
+        <button id="d_confirm">Confirm</button> 
+
+    </div>
+
+
+</body>
+
+</html>
