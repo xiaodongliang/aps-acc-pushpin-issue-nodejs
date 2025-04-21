@@ -57,6 +57,7 @@ MyExtension.prototype.onToolbarCreated = function () {
   this.createUI();
 };
 
+
 //  button of load issues
 MyExtension.prototype.loadIssueButton = function () {
   var _this = this;
@@ -74,7 +75,11 @@ MyExtension.prototype.loadIssueButton = function () {
     // if panel is NOT visible, exit the function
     if (!_this.panel.isVisible()) return;
     // ok, it's visible, let's load the issues
-    _this.loadIssues();
+    const loadedDocument = _this.viewer.model.getDocumentNode();
+    if(loadedDocument.data.role == '3d')
+      _this.loadIssues3D();
+    else
+      _this.loadIssues2D();
   };
   loadIssuesBtn.addClass('loadIssuesBtn');
   loadIssuesBtn.setToolTip('Show Issues');
@@ -87,7 +92,12 @@ MyExtension.prototype.createIssueButton = function () {
   var createIssuesBtn = new Autodesk.Viewing.UI.Button('createIssuesBtn');
   createIssuesBtn.onClick = function (e) {
     if (!this.pushPinExtension) {
-      _this.createIssue(); // show issues
+      const loadedDocument = _this.viewer.model.getDocumentNode();
+      if(loadedDocument.data.role == '3d')
+        _this.createIssue3D(); // show issues
+      else
+        _this.createIssue2D();
+
     }
   };
   createIssuesBtn.addClass('createIssuesBtn');
@@ -145,9 +155,11 @@ MyExtension.prototype.createIssueImpl = async function (projectId, data) {
     });
   })
 }
+ 
 
-//load issues to APS Viewer
-MyExtension.prototype.loadIssues = async function () {
+
+//load issues of 3D view to APS Viewer
+MyExtension.prototype.loadIssues3D = async function () {
   var _this = this;
   var allIssues = await this.getIssuesList();
   if (_this.panel) _this.panel.removeAllProperties();
@@ -155,7 +167,9 @@ MyExtension.prototype.loadIssues = async function () {
   //filter with specific document of the model （One file item may contain 2D view, 2D sheet, 3D model etc)
   const loadedDocument = _this.viewer.model.getDocumentNode();
   allIssues = allIssues.filter(i =>
-    i.linkedDocuments && (i.linkedDocuments[0].details.viewable.guid == loadedDocument.data.guid)
+    i.linkedDocuments && 
+    i.linkedDocuments[0].details.viewable.guid == loadedDocument.data.guid &&
+    i.linkedDocuments[0].details.viewable.viewableId == loadedDocument.data.viewableID
   )
   if (allIssues.length > 0) {
     this.pushPinExtension.removeAllItems();
@@ -197,16 +211,15 @@ MyExtension.prototype.loadIssues = async function () {
   }
 }
 
-//create one issue
-MyExtension.prototype.createIssue = async function () {
+
+//create one issue of 3D view
+MyExtension.prototype.createIssue3D = async function () {
   var _this = this;
   var issueLabel = prompt("Enter issue title: ");
   if (issueLabel === null) return;
 
-  //const issueSubTypes = await getIssueSubTypeList()
-
-  //$('#provisionAccountModal').modal('toggle');
-
+  //const issueSubTypes = await getIssueSubTypeList() 
+  //$('#provisionAccountModal').modal('toggle'); 
   // var issueSubTypeId = prompt("Enter issue sub type: ");
   // if (issueSubTypeId === null) return; 
 
@@ -215,23 +228,11 @@ MyExtension.prototype.createIssue = async function () {
 
     _this.pushPinExtension.pushPinManager.removeEventListener('pushpin.created', arguments.callee);
     _this.pushPinExtension.endCreateItem();
+    
 
-    var newIssue = e.value.itemData;
-    if (newIssue === null) return; 
-
-    //due to the problems of Pushpin extension, adjust the globalOffset 
-    //copy from PushpinLegacyFallback.js >> getLegacyGlobalOffset
-    const boxData = this.viewer.model && this.viewer.model.myData.metadata['world bounding box'];
-    const pMin = boxData.minXYZ;
-    const pMax = boxData.maxXYZ;
-    newIssue.viewerState.globalOffset = {
-      x: 0.5 * (pMin[0] + pMax[0]),
-      y: 0.5 * (pMin[1] + pMax[1]),
-      z: 0.5 * (pMin[2] + pMax[2])
-    };
-
-    //get external id of the object
-    newIssue.externalId = await this.getExternalIdFromObjectId(newIssue.objectId) 
+    const newIssue = _this.pushPinExtension.getLegacyPushPinData
+                      ? _this.pushPinExtension.getLegacyPushPinData(e.value)
+                      : e.value.data;  
 
     const selNode = getSelectedNodeData();
     const loadedDocument = _this.viewer.model.getDocumentNode();
@@ -270,7 +271,6 @@ MyExtension.prototype.createIssue = async function () {
   // start asking for the push location
   _this.pushPinExtension.startCreateItem({ label: issueLabel, status: 'open', type: 'issues' });
 }
-
 //get issue list from APS
 MyExtension.prototype.getIssueSubTypeList = async function () {
   var _this = this;
@@ -287,6 +287,18 @@ MyExtension.prototype.getIssueSubTypeList = async function () {
       }
     });
   })
+}
+
+
+//create one issue of 2D view
+MyExtension.prototype.createIssue2D = async function () {
+  alert('2D pushpin data is not available with current API.')
+}
+
+//load issues of 2D view to APS Viewer
+MyExtension.prototype.loadIssues3D = async function () {
+  alert('2D pushpin data is not available with current API.')
+
 }
 
 MyExtension.prototype.getExternalIdFromObjectId = async function (dbId) {
